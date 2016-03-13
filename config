@@ -1,3 +1,4 @@
+--log by violet zhu
 skynet_root = "./skynet/"
 root = "./"
 thread = 8
