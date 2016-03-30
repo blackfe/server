@@ -32,15 +32,15 @@ move 1 {
 		result 0 : integer
 	}
 }
+
+playersInfo 2 {
+    response {
+      player 0 : *MoveInfo
+    }
+}
 ]]
 
 local s2c = [[
-   request {
-     moves 0 : MoveInfo
-   }
-   response {
-     result 0 : integer
-   }
 ]]
 
 game_proto.c2s = sparser.parse(types .. c2s)

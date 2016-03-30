@@ -6,15 +6,17 @@ if _VERSION ~= "Lua 5.3" then
 end
 
 local socket = require "clientsocket"
-local proto = require "login_proto"
-local proto2 = require "game_proto"
+local login_proto = require "login_proto"
+local game_proto = require "game_proto"
 local sparser = require "sprotoparser"
 local sproto = require "sproto"
 
 
 local fd = assert(socket.connect("127.0.0.1", 6254))
-local host = sproto.new(proto.s2c):host("package")
-local request = host:attach(sproto.new(proto.c2s))
+local host = sproto.new(login_proto.s2c):host("package")
+local request = host:attach(sproto.new(login_proto.c2s))
+
+local bLogin = false
 
 local session = 0
 local last = ""
@@ -23,7 +25,6 @@ local function send_package(fd,pack)
       local package = string.pack(">s2",pack)
       socket.send(fd,package)
 end
-
 local function send_request(name,args)
       session = session + 1
       local str = request(name,args,session)
@@ -68,8 +69,13 @@ local function print_request(name,args)
       end
 end
 
-local function print_response(session,args)
+local function deal_response(session,args)
       print("RESPONSE",session)
+      if bLogin == false then
+        bLogin = true
+        host = sproto.new(game_proto.s2c):host("package")
+        request = host:attach(sproto.new(game_proto.c2s))
+      end
       if args then
          for k,v in pairs(args) do
              print(k,v)
@@ -77,12 +83,12 @@ local function print_response(session,args)
       end
 end
 
-local function print_package(t,...)
+local function deal_package(t,...)
   if t == "REQUEST" then
      print_request(...)
   else
     assert(t=="RESPONSE")
-    print_response(...)
+    deal_response(...)
   end
 end
 
@@ -93,7 +99,7 @@ local function dispatch_package()
     if not v then
       break
     end
-    print_package(host:dispatch(v))
+    deal_package(host:dispatch(v))
   end
 end
 
@@ -103,7 +109,11 @@ while true do
       if cmd then
          
       else
-        send_request("login",{username="blackfe",password="123456"})
+        if bLogin == false then
+           send_request("login",{username="blackfe",password="123456"})
+        else
+           send_request("playersInfo")
+        end
         socket.usleep(1000000)
       end
 end

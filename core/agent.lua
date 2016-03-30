@@ -15,7 +15,13 @@ local client_fd
 
 function REQUEST:login()
   print("login",self.username,self.password)
-  return {result = "10000000"}
+  host = sprotoloader.load(3):host "package"
+  send_request = host:attach(sprotoloader.load(4))
+  return {account = 10000000}
+end
+
+function REQUEST:playersInfo()
+ return {player={{account=123,pos={x=1,y=2,z=3,o=4}}}}
 end
 
 local function request(name, args, response)
