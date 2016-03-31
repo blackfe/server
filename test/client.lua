@@ -22,6 +22,7 @@ local session = 0
 local last = ""
 local bLogin = false
 local RESPONSE = {}
+local REQUEST = {}
 
 local sessionCB = {}
 
@@ -73,7 +74,7 @@ local function recv_package(last)
       return unpack_package(last .. r)
 end
 
-local function print_request(name,args)
+local function deal_request(name,args)
       print("REQUEST",name)
       if args then
          dump(args)
@@ -96,7 +97,7 @@ end
 
 local function deal_package(t,...)
   if t == "REQUEST" then
-     print_request(...)
+     deal_request(...)
   else
     assert(t=="RESPONSE")
     deal_response(...)
@@ -126,6 +127,10 @@ function RESPONSE:playersInfo()
 
     otherPlayer.pos = v.pos
   end
+end
+
+function REQUEST:playerMove()
+  print("player "..self.account.." move to "..self.pos.x.." "..self.pos.y.." "..self.pos.z)
 end
 
 function RESPONSE:move()

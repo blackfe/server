@@ -109,7 +109,8 @@ end
 
 function CMD.updatePlayerMove(playerAccount,pos)
   if account ~= playerAccount then
-     send_request("playerMove",{pos = pos})
+     send_package(send_request("playerMove",{player = {account = playerAccount,pos = pos}}))
+     print("account "..playerAccount)
   end
 end
 

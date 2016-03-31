@@ -51,7 +51,7 @@ end
 
 function CMD.broadcast(name,...)
   for k,v in pairs(agent) do
-    skynet.call(agent[fd],"lua",name,...)
+    skynet.call(v,"lua",name,...)
   end
 end
 
@@ -70,5 +70,5 @@ skynet.start(function()
 
 	gate = skynet.newservice("gate")
 	onlinePlayerMgr = skynet.newservice("OnlinePlayerMgr")
-	skynet.call(onlinePlayerMgr,"start",{skynet.self()})
+	skynet.call(onlinePlayerMgr,"lua","start",{watchdog = skynet.self()})
 end)
