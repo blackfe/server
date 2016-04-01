@@ -1,10 +1,21 @@
-require "functions"
 local skynet = require "skynet"
+local sprotoloader = require "sprotoloader"
+
+local max_client = 64
 
 skynet.start(function()
-    local loginsvr = skynet.newservice("loginserver")
-    local addr = skynet.getenv("address")
-    local addrTable = string.split(addr,":")
-    assert(#addrTable==2)
-    skynet.call(loginsvr,"lua","open",{host=addrTable[1],port=addrTable[2]})
+	print("Server start")
+	skynet.uniqueservice("protoloader")
+	local console = skynet.newservice("console")
+	skynet.newservice("debug_console",8000)
+	skynet.newservice("simpledb")
+	local watchdog = skynet.newservice("watchdog")
+	skynet.call(watchdog, "lua", "start", {
+		port = 6254,
+		maxclient = max_client,
+		nodelay = true,
+	})
+	print("Watchdog listen on ", 6254)
+
+	skynet.exit()
 end)
