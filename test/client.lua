@@ -1,9 +1,11 @@
 package.cpath = "../skynet/luaclib/?.so"
-package.path = "../skynet/lualib/?.lua;../proto/?.lua"
+package.path = "../skynet/lualib/?.lua;../proto/?.lua;../core/?.lua"
 
 if _VERSION ~= "Lua 5.3" then
    error "Use lua 5.3"
 end
+
+require "functions"
 
 local socket = require "clientsocket"
 local login_proto = require "login_proto"
@@ -16,10 +18,15 @@ local fd = assert(socket.connect("127.0.0.1", 6254))
 local host = sproto.new(login_proto.s2c):host("package")
 local request = host:attach(sproto.new(login_proto.c2s))
 
-local bLogin = false
-
 local session = 0
 local last = ""
+local bLogin = false
+local RESPONSE = {}
+
+local sessionCB = {}
+
+local myPos
+local otherPlayers
 
 local function send_package(fd,pack)
       local package = string.pack(">s2",pack)
@@ -27,6 +34,12 @@ local function send_package(fd,pack)
 end
 local function send_request(name,args)
       session = session + 1
+      if RESPONSE[name] == nil then
+        print("call back "..name.." not found")
+      else
+        sessionCB[session] = RESPONSE[name]
+      end
+      
       local str = request(name,args,session)
       send_package(fd,str)
 end
@@ -63,24 +76,22 @@ end
 local function print_request(name,args)
       print("REQUEST",name)
       if args then
-         for k,v in pairs(args) do
-             print(k,v)
-         end
+         dump(args)
       end
 end
 
 local function deal_response(session,args)
       print("RESPONSE",session)
-      if bLogin == false then
-        bLogin = true
-        host = sproto.new(game_proto.s2c):host("package")
-        request = host:attach(sproto.new(game_proto.c2s))
-      end
       if args then
-         for k,v in pairs(args) do
-             print(k,v)
-         end
+         dump(args)
       end
+
+      if sessionCB[session] == nil then
+        return
+      end
+
+      local f = sessionCB[session]
+      f(args)
 end
 
 local function deal_package(t,...)
@@ -103,6 +114,53 @@ local function dispatch_package()
   end
 end
 
+
+function RESPONSE:playersInfo()
+  local bFound = false
+  for i,v in ipairs(self.player) do
+    local otherPlayer
+    if otherPlayers[v.account] == nil then
+      otherPlayer = {}
+      otherPlayers[v.account] = otherPlayer
+    end
+
+    otherPlayer.pos = v.pos
+  end
+end
+
+function RESPONSE:move()
+end
+
+function RESPONSE:myInfo()
+  myPos = self.pos
+end
+
+function RESPONSE:login()
+    bLogin = true
+    host = sproto.new(game_proto.s2c):host("package")
+    request = host:attach(sproto.new(game_proto.c2s))
+    send_request("myInfo")
+end
+
+
+local function move()
+  print("move")
+  if myPos ~= nil then
+    local offset = {}
+    offset.x = math.random(0,10)
+    offset.y = math.random(0,10)
+    offset.z = math.random(0,10)
+    offset.o = math.random(0,10)
+    myPos.x = myPos.x + offset.x
+    myPos.y = myPos.y + offset.y
+    myPos.z = myPos.z + offset.z
+    myPos.o = myPos.o + offset.o
+    send_request("move",{pos = myPos})
+  end
+end
+
+local count = 0
+
 while true do
       dispatch_package()
       local cmd = socket.readstdin()
@@ -112,7 +170,11 @@ while true do
         if bLogin == false then
            send_request("login",{username="blackfe",password="123456"})
         else
-           send_request("playersInfo")
+           --send_request("playersInfo")
+           count = count + 1
+           if math.fmod(count,5) == 0 then
+             move()
+           end
         end
         socket.usleep(1000000)
       end

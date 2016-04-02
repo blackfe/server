@@ -1,15 +1,16 @@
 local skynet = require "skynet"
 local netpack = require "netpack"
-
+require "functions"
 local CMD = {}
 local SOCKET = {}
 local gate
 local agent = {}
+local onlinePlayerMgr 
 
 function SOCKET.open(fd, addr)
 	skynet.error("New client from : " .. addr)
 	agent[fd] = skynet.newservice("agent")
-	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self() })
+	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self(), mgr = onlinePlayerMgr })
 end
 
 local function close_agent(fd)
@@ -48,6 +49,12 @@ function CMD.close(fd)
 	close_agent(fd)
 end
 
+function CMD.broadcast(name,...)
+  for k,v in pairs(agent) do
+    skynet.call(agent[fd],"lua",name,...)
+  end
+end
+
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
 	    print("session "..session.."source "..source.."cmd "..cmd)
@@ -62,5 +69,6 @@ skynet.start(function()
 	end)
 
 	gate = skynet.newservice("gate")
-	print("gate "..gate)
+	onlinePlayerMgr = skynet.newservice("OnlinePlayerMgr")
+	skynet.call(onlinePlayerMgr,"start",{skynet.self()})
 end)

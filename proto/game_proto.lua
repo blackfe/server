@@ -38,9 +38,20 @@ playersInfo 2 {
       player 0 : *MoveInfo
     }
 }
+
+myInfo 3 {
+    response {
+      pos 0 : Position
+    }
+}
 ]]
 
 local s2c = [[
+playerMove 1 {
+  request {
+    player 0 : MoveInfo
+  }
+}
 ]]
 
 game_proto.c2s = sparser.parse(types .. c2s)
