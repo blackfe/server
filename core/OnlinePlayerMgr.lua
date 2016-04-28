@@ -4,9 +4,9 @@ local players = {}
 local account = 1000000
 local watchdog
 local CMD = {}
-function CMD.playerLogin(player)
+function CMD.playerLogin(...)
   account = account + 1
-  local accountInfo = skynet.call(gamesql,"lua","get_account",player)
+  local accountInfo = skynet.call(gamesql,"lua","get_account",...)
   players[account] = accountInfo
   return account
 end

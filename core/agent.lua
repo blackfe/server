@@ -29,7 +29,7 @@ function REQUEST:login()
   print("login",self.username,self.password)
   host = sprotoloader.load(3):host "package"
   send_request = host:attach(sprotoloader.load(4))
-  account = skynet.call(onlinePlayerMgr,"lua","playerLogin")
+  account = skynet.call(onlinePlayerMgr,"lua","playerLogin",self.username,self.password)
   return {account = account}
 end
 
