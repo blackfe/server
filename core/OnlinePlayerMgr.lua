@@ -6,7 +6,7 @@ local watchdog
 local CMD = {}
 function CMD.playerLogin(...)
   account = account + 1
-  local accountInfo = skynet.call(gamesql,"lua","get_account",...)
+  local accountInfo = skynet.call(gamesql,"lua","get_account_info",...)
   players[account] = accountInfo
   return account
 end

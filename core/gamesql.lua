@@ -75,9 +75,10 @@ function CMD.get_account_info(username,password)
     end
 end
 
-function CMD.set_account_info(username,info_table)
+function CMD.set_account_info(username,info)
     --update players set info='begin' where username ='blackfe';
-
+    db_res = db:query("update players set info='"..info.."' where username ='"..username.."';")
+    print( dump_db( db_res ) )
 end
 
 local function init_tables(db)

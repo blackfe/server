@@ -14,7 +14,7 @@ login 1 {
 		username 1 : string
 		password 2 : string
 	}
-	response {
+    response {
 		account 0 : integer
 	}
 }
