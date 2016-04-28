@@ -6,7 +6,7 @@ logger = nil
 logpath = "./log"
 harbor = 0
 start = "main"	-- main script
-address="127.0.0.1:6254"
+address="139.196.53.57:6254"
 bootstrap = "snlua bootstrap"	-- The service for bootstrap
 
 lua_path = skynet_root.."lualib/?.lua;"..root.."gamelogic/?.lua;"..root.."core/?.lua;./proto/?.lua"
