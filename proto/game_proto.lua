@@ -18,6 +18,12 @@ local types = [[
   account 0 : integer
   pos 1 : Position
 }
+
+.ObjectInfo {
+    id 0 : integer
+    type 1 : integer
+    data 2 : string
+}
 ]]
 
 
@@ -51,6 +57,12 @@ playerMove 1 {
   request {
     player 0 : MoveInfo
   }
+}
+
+createObjects 2 {
+    request {
+        objects 0: *ObjectInfo
+    }
 }
 ]]
 

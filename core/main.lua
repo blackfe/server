@@ -8,14 +8,13 @@ skynet.start(function()
 	skynet.uniqueservice("protoloader")
 	local console = skynet.newservice("console")
 	skynet.newservice("debug_console",8000)
-    skynet.newservice("gamesql")
+    skynet.uniqueservice("gamesql")
     local watchdog = skynet.newservice("watchdog")
 	skynet.call(watchdog, "lua", "start", {
-		port = 6254,
+        port = 6254,
 		maxclient = max_client,
 		nodelay = true,
-	})
-	print("Watchdog listen on ", 6254)
+    })
 
 	skynet.exit()
 end)

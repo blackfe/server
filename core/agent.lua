@@ -3,6 +3,7 @@ local netpack = require "netpack"
 local socket = require "socket"
 local sproto = require "sproto"
 local sprotoloader = require "sprotoloader"
+local battleHandler = require "BattleHandler"
 require("functions")
 
 local WATCHDOG
@@ -15,7 +16,7 @@ local client_fd
 local onlinePlayerMgr
 local myPos = nil
 local account
-
+local World = nil
 local function initPos()
   myPos = {}
   myPos.x = math.random(0,100)
@@ -30,6 +31,7 @@ function REQUEST:login()
   host = sprotoloader.load(3):host "package"
   send_request = host:attach(sprotoloader.load(4))
   account = skynet.call(onlinePlayerMgr,"lua","playerLogin",self.username,self.password)
+  skynet.call(World,"lua","enterWorld")
   return {account = account}
 end
 
@@ -39,7 +41,8 @@ function REQUEST:playersInfo()
 end
 
 function REQUEST:move()
-  skynet.call(onlinePlayerMgr,"lua","playerMove",account,self.pos)
+  --skynet.call(onlinePlayerMgr,"lua","playerMove",account,self.pos)
+
   return {result = 1}
 end
 
@@ -92,7 +95,8 @@ function CMD.start(conf)
 	local fd = conf.client
 	local gate = conf.gate
 	WATCHDOG = conf.watchdog
-	onlinePlayerMgr = conf.mgr
+    onlinePlayerMgr = conf.mgr
+    World = conf.world
 	-- slot 1,2 set at main.lua
 	host = sprotoloader.load(1):host "package"
 	send_request = host:attach(sprotoloader.load(2))
@@ -113,6 +117,8 @@ function CMD.updatePlayerMove(playerAccount,pos)
      print("account "..playerAccount)
   end
 end
+
+
 
 function CMD.disconnect()
 	-- todo: do something before exit

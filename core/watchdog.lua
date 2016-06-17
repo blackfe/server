@@ -5,12 +5,13 @@ local CMD = {}
 local SOCKET = {}
 local gate
 local agent = {}
-local onlinePlayerMgr 
+local onlinePlayerMgr
+local World
 
 function SOCKET.open(fd, addr)
 	skynet.error("New client from : " .. addr)
 	agent[fd] = skynet.newservice("agent")
-	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self(), mgr = onlinePlayerMgr })
+	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self(), mgr = onlinePlayerMgr, world = World})
 end
 
 local function close_agent(fd)
@@ -70,5 +71,6 @@ skynet.start(function()
 
 	gate = skynet.newservice("gate")
 	onlinePlayerMgr = skynet.newservice("OnlinePlayerMgr")
+	World = skynet.newservice("World")
 	skynet.call(onlinePlayerMgr,"lua","start",{watchdog = skynet.self()})
 end)

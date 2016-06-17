@@ -51,9 +51,9 @@ function CMD.add_account(username,password)
     print("CMD.add_account")
     db_res = db:query("select * from players where username = '"..username.."';" )
     print(dump_db(db_res))
-    if #db_res > 0 then then
-       return nil
-    end
+    --[[if #db_res > 0 then
+        return nil
+        end]]
     db_res = db:query("insert into players(username,password,info) values('"..username.."','"..password.."',null)")
     print(dump_db(db_res))
     return 1

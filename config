@@ -4,11 +4,12 @@ root = "./"
 thread = 8
 logger = nil
 logpath = "./log"
-harbor = 0
+harbor = 1
 start = "main"	-- main script
-address="139.196.53.57:6254"
+address="0.0.0.0:2001"
 bootstrap = "snlua bootstrap"	-- The service for bootstrap
-
+master = "0.0.0.0:2000"
+standalone = "0.0.0.0:2000"
 lua_path = skynet_root.."lualib/?.lua;"..root.."gamelogic/?.lua;"..root.."core/?.lua;./proto/?.lua"
 lua_cpath = skynet_root.."luaclib/?.so;"
 cpath = skynet_root.."cservice/?.so;"
