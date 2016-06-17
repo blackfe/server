@@ -51,7 +51,7 @@ function CMD.add_account(username,password)
     print("CMD.add_account")
     db_res = db:query("select * from players where username = '"..username.."';" )
     print(dump_db(db_res))
-    if #db_res > 0 then then
+    if #db_res > 0 then
        return nil
     end
     db_res = db:query("insert into players(username,password,info) values('"..username.."','"..password.."',null)")
@@ -98,7 +98,7 @@ skynet.start(function()
         port=3306,
 		database="skynet",
 		user="root",
-		password="1",
+		password="62544872",
 		max_packet_size = 1024 * 1024,
 		on_connect = on_connect
 	})
