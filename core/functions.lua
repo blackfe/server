@@ -1,3 +1,42 @@
+--Create an class.
+function class(classname, super)
+    local superType = type(super)
+    local cls
+
+    if superType ~= "function" and superType ~= "table" then
+        superType = nil
+        super = nil
+    end
+
+    -- inherited from Lua Object
+    if super then
+        cls = clone(super)
+        cls.super = super
+    else
+        cls = {ctor = function() end}
+    end
+
+    cls.__cname = classname
+    cls.__index = cls
+
+    function cls.new(...)
+        local instance = setmetatable({}, cls)
+        instance.class = cls
+        instance:ctor(...)
+        return instance
+    end
+
+    return cls
+end
+
+function handler(obj, method)
+    return function(...)
+        if method ~= nil then
+            return method(obj, ...)
+        end
+    end
+end
+
 function string.split(str, delimiter)
     if (delimiter=='') then return false end
     local pos,arr = 0, {}
@@ -29,7 +68,7 @@ function dump(value, desciption, nesting)
 
     local lookupTable = {}
     local result = {}
-
+    local text = ""
     local function _v(v)
         if type(v) == "string" then
             v = "\"" .. v .. "\""
@@ -37,8 +76,8 @@ function dump(value, desciption, nesting)
         return tostring(v)
     end
 
-    local traceback = string.split(debug.traceback("", 2), "\n")
-    print("dump from: " .. string.trim(traceback[3]))
+    --local traceback = string.split(debug.traceback("", 2), "\n")
+    --text = text .."dump from: " .. string.trim(traceback[3]) .."\n"
 
     local function _dump(value, desciption, indent, nest, keylen)
         desciption = desciption or "<var>"
@@ -84,6 +123,7 @@ function dump(value, desciption, nesting)
     _dump(value, desciption, "- ", 1)
 
     for i, line in ipairs(result) do
-        print(line)
+        text = text .. line .."\n"
     end
+    return text
 end

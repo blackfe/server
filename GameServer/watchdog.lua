@@ -1,11 +1,13 @@
 local skynet = require "skynet"
 local netpack = require "netpack"
+local crypt = require "crypt"
 require "functions"
 local CMD = {}
 local SOCKET = {}
 local gate
 local agent = {}
 local onlinePlayerMgr 
+local accountTokenMap = {}
 
 function SOCKET.open(fd, addr)
 	skynet.error("New client from : " .. addr)
@@ -55,6 +57,26 @@ function CMD.broadcast(name,...)
   end
 end
 
+function CMD.login(data)
+	local accountID = data.accountID
+	local user_data = skynet.call("GAMESQL","lua","get",SERVER_NAME,{accountID = accountID})
+
+	local token = crypt.randomkey()
+
+	if accountTokenMap[accountID] == nil then
+		accountTokenMap[accountID] = {}
+	end
+	accountTokenMap[accountID].token = token
+	if #user_data == 0 then
+		skynet.call("GAMESQL","lua","add",SERVER_NAME,{accountID = accountID})
+		accountTokenMap[accountID].data = {}
+	else
+		accountTokenMap[accountID].data = user_data[1]
+	end
+
+	return token
+end
+
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
 	    print("session "..session.."source "..source.."cmd "..cmd)
@@ -68,7 +90,11 @@ skynet.start(function()
 		end
 	end)
 
+	SERVER_NAME = skynet.getenv("server_name")
+
 	gate = skynet.newservice("gate")
 	onlinePlayerMgr = skynet.newservice("OnlinePlayerMgr")
 	skynet.call(onlinePlayerMgr,"lua","start",{watchdog = skynet.self()})
+	skynet.call("login_master","lua","register",{name = SERVER_NAME,ip = "127.0.0.1:"..skynet.getenv("port"),addr = skynet.self()})
+	skynet.call("GAMESQL","lua","register",skynet.getenv("server_name"))
 end)
