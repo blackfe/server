@@ -3,10 +3,8 @@ local netpack = require "netpack"
 local socket = require "socket"
 local sproto = require "sproto"
 local sprotoloader = require "sprotoloader"
-local battleHandler = require "BattleHandler"
 require("functions")
 
-local WATCHDOG
 local host
 local send_request
 
@@ -26,14 +24,6 @@ local function initPos()
   skynet.call(onlinePlayerMgr,"lua","playerMove",account,myPos)
 end
 
-function REQUEST:login()
-  print("login",self.username,self.password)
-  host = sprotoloader.load(3):host "package"
-  send_request = host:attach(sprotoloader.load(4))
-  account = skynet.call(onlinePlayerMgr,"lua","playerLogin",self.username,self.password)
-  skynet.call(World,"lua","enterWorld")
-  return {account = account}
-end
 
 function REQUEST:playersInfo()
  local playersInfo = skynet.call(onlinePlayerMgr,"lua","getPlayersInfo",account)
@@ -93,10 +83,9 @@ skynet.register_protocol {
 
 function CMD.start(conf)
 	local fd = conf.client
-	local gate = conf.gate
-	WATCHDOG = conf.watchdog
-    onlinePlayerMgr = conf.mgr
-    World = conf.world
+    local gate = conf.gate
+    onlinePlayerMgr = "OnlinePlayerMgr"
+    World = "World"
 	-- slot 1,2 set at main.lua
 	host = sprotoloader.load(1):host "package"
 	send_request = host:attach(sprotoloader.load(2))

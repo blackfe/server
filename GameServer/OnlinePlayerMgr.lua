@@ -3,7 +3,7 @@ local skynet = require "skynet"
 local players = {}
 local account = 1000000
 local watchdog
-local gamesql
+local gamesql = "GAMESQL"
 local CMD = {}
 function CMD.playerLogin(...)
   account = account + 1
@@ -42,7 +42,6 @@ end
 
 skynet.start(function ()
     local self = skynet.self()
-    gamesql = skynet.uniqueservice("gamesql")
     skynet.dispatch("lua",function(_,source,command,...)
     local f = assert (CMD[command])
     skynet.ret(skynet.pack(f(...)))

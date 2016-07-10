@@ -12,9 +12,9 @@ local login_proto = require "login_proto"
 local game_proto = require "game_proto"
 local sparser = require "sprotoparser"
 local sproto = require "sproto"
+local crypt = require "crypt"
 
-
-local fd = assert(socket.connect("127.0.0.1", 6254))
+local fd = assert(socket.connect("0.0.0.0", 8001))
 local host = sproto.new(login_proto.s2c):host("package")
 local request = host:attach(sproto.new(login_proto.c2s))
 
@@ -29,6 +29,11 @@ local sessionCB = {}
 local myPos
 local otherPlayers
 
+local clientkey
+local secret
+local server_ip = ""
+
+
 local function send_package(fd,pack)
       local package = string.pack(">s2",pack)
       socket.send(fd,package)
@@ -36,7 +41,7 @@ end
 local function send_request(name,args)
       session = session + 1
       if RESPONSE[name] == nil then
-        print("call back "..name.." not found")
+        --print("call back "..name.." not found")
       else
         sessionCB[session] = RESPONSE[name]
       end
@@ -77,14 +82,14 @@ end
 local function deal_request(name,args)
       print("REQUEST",name)
       if args then
-         dump(args)
+        print(dump(args))
       end
 end
 
 local function deal_response(session,args)
       print("RESPONSE",session)
       if args then
-         dump(args)
+        print(dump(args))
       end
 
       if sessionCB[session] == nil then
@@ -140,15 +145,59 @@ function RESPONSE:myInfo()
   myPos = self.pos
 end
 
+local function verify_token(token)
+  return string.format("%s:%s",
+                       crypt.base64encode(token.user),
+                       crypt.base64encode(token.password))
+end
+
+function RESPONSE:getSecret()
+  local serverkey = crypt.base64decode(self.serverkey)
+  print(dump(self))
+  local challenge = crypt.base64decode(self.challenge)
+  secret = crypt.dhsecret(serverkey, clientkey)
+  local hmac = crypt.hmac64(challenge,secret)
+  local token = crypt.base64encode(crypt.desencode(secret,verify_token({user = "blackfe"..math.random(100),password = "62544872"})))
+  send_request("verify",{hmac = crypt.base64encode(hmac), token = token})
+end
+
+local function encode_token(token)
+  local str = string.format("%s:%s",
+                       crypt.base64encode(token.accountID),
+                       crypt.base64encode(token.server))
+  print("str ".. str)
+  return str
+end
+
+
+function RESPONSE:verify()
+  if self.result ~= 0  then
+    print("login failed")
+    exit()
+  end
+  local randomIndex = math.random(#self.zones)
+  local server = self.zones[randomIndex].name
+  server_ip = self.zones[randomIndex].ip
+  print(dump(self))
+  local etoken = crypt.base64encode(crypt.desencode(secret,encode_token({accountID = tostring(self.accountID), server = server})))
+  print(dump(etoken))
+  send_request("login",{etoken = etoken})
+end
+
 function RESPONSE:login()
     bLogin = true
     host = sproto.new(game_proto.s2c):host("package")
     request = host:attach(sproto.new(game_proto.c2s))
-    send_request("myInfo")
+    socket.close(fd)
+    os.exit()
+    print(dump(server_ip))
+    local _ip = string.split(server_ip,":")
+    fd = assert(socket.connect(_ip[1], tonumber(_ip[2])))
+
 end
 
 
-local function move()
+function move()
   print("move")
   if myPos ~= nil then
     local offset = {}
@@ -166,6 +215,13 @@ end
 
 local count = 0
 
+function start_login()
+  clientkey = crypt.randomkey()
+  send_request("getSecret",{clientkey = crypt.base64encode(crypt.dhexchange(clientkey))})
+end
+
+math.randomseed(os.clock())
+
 while true do
       dispatch_package()
       local cmd = socket.readstdin()
@@ -173,14 +229,11 @@ while true do
          
       else
         if bLogin == false then
-           send_request("login",{username="blackfe",password="123456"})
+          start_login()
+          bLogin = true
         else
-           --send_request("playersInfo")
-           count = count + 1
-           if math.fmod(count,5) == 0 then
-             move()
-           end
+
         end
-        socket.usleep(1000000)
-      end
+        socket.usleep(10)
+  end
 end
