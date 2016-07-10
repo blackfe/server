@@ -1,3 +1,3 @@
 #!/bin/bash
 
-../skynet/skynet ../config/master.cfg
+../skynet/skynet ../MasterServer/master.cfg
