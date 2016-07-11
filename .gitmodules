@@ -1,6 +1,3 @@
 [submodule "skynet"]
 	path = skynet
 	url = https://github.com/blackfe/skynet.git
-[submodule "common"]
-	path = common
-	url = https://github.com/MarkGame/common.git
