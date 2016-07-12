@@ -13,7 +13,6 @@ for i,v in ipairs(file_list) do
 	local file_proto = require(v)
 	if file_proto.type then
 		types = types .. file_proto.type
-		print(types)
 	end
 	if file_proto.s2c then
 		protocol = protocol .. file_proto.s2c
@@ -128,6 +127,9 @@ function table.unserialize(str)
     end  
 end
 
+
+
 local f = io.open("sproto_data","w+b")
-f:write(table.serialize(proto))
+local newData = table.serialize(proto)
+f:write(newData)
 f:close()
