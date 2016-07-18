@@ -1,0 +1,26 @@
+1.修改Sproto的解析方式
+	1）不要序号
+		move 1 {
+			request {
+				pos 0 : Position
+			}
+			response {
+				result 0 : integer
+			}
+		}
+		修改成
+		move  {
+			request {
+				pos  : Position
+			}
+			response {
+				result  : integer
+			}
+		}
+		
+		因为序号没有什么意义
+		
+	2） 修改协议的发送方式，上层不需要知道发送的协议是在哪个文件内的。
+		类似于sendProto("move",data)
+		
+	3） 预编译Sproto,把sprotoparser做的事情放到外部去完成。节约解析时间。
