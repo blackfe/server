@@ -24,7 +24,9 @@ for i,v in ipairs(file_list) do
 end
 local text = types..protocol
 local proto = sprotoparser.parse(text)
+sprotoparser.dump(proto)
 local data = string.format("local data = \"%s\"\nreturn data",proto)
+
 local f = io.open("sproto_data","w+b")
 f:write(data)
 f:close()
