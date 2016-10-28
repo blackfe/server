@@ -1,37 +1,6 @@
-local sparser = require "sprotoparser"
-
 local game_proto = {}
 
-local global_types = require "player_info_proto"
-local types = [[
-.package {
-  type 0 : integer
-  session 1 : integer
-}
-
-.Position {
-  x 0 : integer
-  y 1 : integer
-  z 2 : integer
-  o 3 : integer
-}
-
-.MoveInfo {
-  account 0 : integer
-  pos 1 : Position
-}
-
-.ObjectInfo {
-    id 0 : integer
-    type 1 : integer
-    data 2 : string
-}
-]]
-
-
-game_proto.types = sparser.parse(types)
-
-local c2s = [[
+game_proto.c2s = [[
 move 1 {
 	request {
 		pos 0 : Position
@@ -54,7 +23,7 @@ myInfo 3 {
 }
 ]]
 
-local s2c = [[
+game_proto.s2c = [[
 playerMove 1 {
   request {
     player 0 : MoveInfo
@@ -67,7 +36,4 @@ createObjects 2 {
     }
 }
 ]]
-
-game_proto.c2s = sparser.parse(global_types .. types .. c2s)
-game_proto.s2c = sparser.parse(global_types .. types .. s2c)
 return game_proto
