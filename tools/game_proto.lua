@@ -1,65 +1,73 @@
+local sparser = require "sprotoparser"
 
 local game_proto = {}
-game_proto.type = [[
+
+local global_types = require "player_info_proto"
+local types = [[
 .package {
-  type : integer
-  session : integer
+  type 0 : integer
+  session 1 : integer
 }
 
 .Position {
-  x : integer
-  y : integer
-  z : integer
-  o : integer
+  x 0 : integer
+  y 1 : integer
+  z 2 : integer
+  o 3 : integer
 }
 
 .MoveInfo {
-  account : integer
-  pos : Position
+  account 0 : integer
+  pos 1 : Position
 }
 
 .ObjectInfo {
-    id : integer
-    type : integer
-    data : string
+    id 0 : integer
+    type 1 : integer
+    data 2 : string
 }
 ]]
 
-game_proto.c2s = [[
-move {
+
+game_proto.types = sparser.parse(types)
+
+local c2s = [[
+move 1 {
 	request {
-		pos : Position
+		pos 0 : Position
 	}
 	response {
-		result : integer
+		result 0 : integer
 	}
 }
 
-playersInfo {
+playersInfo 2 {
     response {
-      player : *MoveInfo
+      player 0 : *MoveInfo
     }
 }
 
-myInfo {
+myInfo 3 {
     response {
-      pos : Position
+      pos 0 : Position
     }
 }
 ]]
 
-game_proto.s2c = [[
-playerMove {
+local s2c = [[
+playerMove 1 {
   request {
-    player : MoveInfo
+    player 0 : MoveInfo
   }
 }
 
-createObjects {
+createObjects 2 {
     request {
-        objects : *ObjectInfo
+        objects 0: *ObjectInfo
     }
 }
 ]]
 
+game_proto.c2s = sparser.parse(global_types .. types .. c2s)
+game_proto.s2c = sparser.parse(global_types .. types .. s2c)
 return game_proto

@@ -1,52 +1,63 @@
+local sparser = require "sprotoparser"
+
 local login_proto = {}
 
-login_proto.c2s = [[
+login_proto.c2s = sparser.parse [[
+.package {
+	type 0 : integer
+	session 1 : integer
+}
+
 .ZoneInfo {
-    zoneID  : integer
-    name  : string
-    ip  : string
+    zoneID 0 : integer
+    name 1 : string
+    ip 2 : string
 }
 
 .RoleInfo {
-  zoneID  : integer
+  zoneID 0 : integer
 }
 
-getSecret {
+getSecret 1 {
     request {
-        clientkey : string
+        clientkey 0 : string
     }
 
     response {
-        challenge  : string
-        serverkey  : string
+        challenge 0 : string
+        serverkey 1 : string
     }
 }
 
-verify {
+verify 2 {
     request {
-        hmac  : string
-        token  : string
+        hmac 0 : string
+        token 1 : string
     }
     response {
-        result  : integer
-        accountID  : integer
-        zones  : *ZoneInfo
-        roles  : *RoleInfo
+        result 0 : integer
+        accountID 1 : integer
+        zones 2 : *ZoneInfo
+        roles 3 : *RoleInfo
     }
 }
 
-login  {
+login 3 {
     request {
-        etoken   : string
+        etoken 0  : string
     }
     response {
-        result  : integer
-        token  : string
+        result 0 : integer
+        token 1 : string
     }
 }
 ]]
 
-login_proto.s2c =  [[
+login_proto.s2c = sparser.parse [[
+.package {
+	type 0 : integer
+	session 1 : integer
+}
 ]]
 
 return login_proto

@@ -1,14 +1,14 @@
-local player_proto = {}
-player_proto.player_info = [[
+local player_info = [[
 .Skill {
-    id : integer
-    level : integer
+    id 0 : integer
+    level 1 : integer
 }
 .Base {
-  hp : integer
-  level : integer
-  skillList : *Skill
+  hp 0 : integer
+  level 1 : integer
+  skillList 2 : *Skill
 }
+
 ]]
 
-return player_proto
+return player_info
