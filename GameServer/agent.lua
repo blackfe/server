@@ -2,6 +2,7 @@ local skynet = require "skynet"
 local netpack = require "netpack"
 local socket = require "socket"
 local sproto = require "sproto"
+local Sproto = require "main_proto"
 local sprotoloader = require "sprotoloader"
 require("functions")
 
@@ -87,8 +88,9 @@ function CMD.start(conf)
     onlinePlayerMgr = "OnlinePlayerMgr"
     World = "World"
 	-- slot 1,2 set at main.lua
-	host = sprotoloader.load(1):host "package"
-	send_request = host:attach(sprotoloader.load(2))
+    local sp = sprotoloader.load(Sproto.GAME_PROTO)
+    host = sp:host "package"
+    send_request = host:attach(sp)
 	--[[skynet.fork(function()
 		while true do
 			send_package(send_request "heartbeat")

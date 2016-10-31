@@ -1,13 +1,12 @@
-local sparser = require "sprotoparser"
-
 local login_proto = {}
-
-login_proto.c2s = sparser.parse [[
+login_proto.types = [[
 .package {
 	type 0 : integer
 	session 1 : integer
 }
+]]
 
+login_proto.c2s = [[
 .ZoneInfo {
     zoneID 0 : integer
     name 1 : string
@@ -53,11 +52,7 @@ login 3 {
 }
 ]]
 
-login_proto.s2c = sparser.parse [[
-.package {
-	type 0 : integer
-	session 1 : integer
-}
+login_proto.s2c = [[
 ]]
 
 return login_proto

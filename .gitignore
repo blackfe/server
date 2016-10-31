@@ -30,3 +30,17 @@
 
 # Debug files
 *.dSYM/
+
+# Skynet files
+bin/skynet.ai
+bin/skynet.game_1
+bin/skynet.game_2
+bin/skynet.sql
+bin/skynet.login
+bin/skynet.master
+bin/log/
+
+
+
+
+

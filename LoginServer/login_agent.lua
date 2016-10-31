@@ -1,6 +1,7 @@
 local skynet = require "skynet"
 local socket = require "socket"
 local sproto = require "sproto"
+local Sproto = require "main_proto"
 local sprotoloader = require "sprotoloader"
 require("functions")
 local crypt = require "crypt"
@@ -121,7 +122,7 @@ function CMD.start(config)
    login_master = config.watchdog
 
    server_list = config.server_list
-   login_sproto = sprotoloader.load(1)
+   login_sproto = sprotoloader.load(Sproto.LOGIN_PROTO)
    host = login_sproto:host "package"
    client_fd = fd
    skynet.call(gate,"lua","forward",fd)

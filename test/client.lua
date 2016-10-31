@@ -1,5 +1,5 @@
 package.cpath = "../skynet/luaclib/?.so"
-package.path = "../skynet/lualib/?.lua;../proto/?.lua;../core/?.lua"
+package.path = "../skynet/lualib/?.lua;../common/proto/?.lua;../common/?.lua;../Utils/?.lua"
 
 if _VERSION ~= "Lua 5.3" then
    error "Use lua 5.3"
@@ -8,15 +8,16 @@ end
 require "functions"
 
 local socket = require "clientsocket"
-local login_proto = require "login_proto"
-local game_proto = require "game_proto"
 local sparser = require "sprotoparser"
+local sprotoloader = require "sprotoloader"
 local sproto = require "sproto"
 local crypt = require "crypt"
+local Sproto = require "main_proto"
 
-local fd = assert(socket.connect("0.0.0.0", 8001))
-local host = sproto.new(login_proto.s2c):host("package")
-local request = host:attach(sproto.new(login_proto.c2s))
+local fd = assert(socket.connect("47.88.6.248", 8001))
+local sp = sprotoloader.load(Sproto.LOGIN_PROTO)
+local host = sp:host("package")
+local request = host:attach(sp)
 
 local session = 0
 local last = ""
@@ -185,9 +186,10 @@ function RESPONSE:verify()
 end
 
 function RESPONSE:login()
-    bLogin = true
-    host = sproto.new(game_proto.s2c):host("package")
-    request = host:attach(sproto.new(game_proto.c2s))
+  bLogin = true
+  sp = sprotoloader.load(Sproto.GAME_PROTO)
+    host = sp:host("package")
+    request = host:attach(sp)
     socket.close(fd)
     os.exit()
     print(dump(server_ip))
