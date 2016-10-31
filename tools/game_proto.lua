@@ -49,13 +49,13 @@ myInfo 3 {
 ]]
 
 game_proto.s2c = [[
-playerMove 1 {
+playerMove 10001 {
   request {
     player 0 : MoveInfo
   }
 }
 
-createObjects 2 {
+createObjects 10002 {
     request {
         objects 0: *ObjectInfo
     }

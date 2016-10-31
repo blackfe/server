@@ -1,3 +1,7 @@
+package.cpath = "../skynet/luaclib/?.so"
+package.path = "../skynet/lualib/?.lua;./?.lua"
+
+
 local sparser = require "sprotoparser"
 local sproto = require "sproto"
 local type_map = {}
@@ -13,8 +17,9 @@ for k,v in pairs(type_map) do
 end
 
 for k,v in pairs(proto_map) do
-	proto_data = proto_data .. v
+	proto_data = proto_data .. v.c2s
+	proto_data = proto_data .. v.s2c
 end
 
-local proto = sparser.parser proto_data
-sproto.new(proto)
+local proto = sparser.parse(proto_data)
+--sproto.new(proto)

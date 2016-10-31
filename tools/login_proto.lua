@@ -7,11 +7,6 @@ login_proto.types = [[
 ]]
 
 login_proto.c2s = [[
-.package {
-	type 0 : integer
-	session 1 : integer
-}
-
 .ZoneInfo {
     zoneID 0 : integer
     name 1 : string
