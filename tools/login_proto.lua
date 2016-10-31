@@ -1,8 +1,27 @@
-local sparser = require "sprotoparser"
-
 local login_proto = {}
+login_proto.types = [[
+.package {
+	type 0 : integer
+	session 1 : integer
+}
+]]
 
 login_proto.c2s = [[
+.package {
+	type 0 : integer
+	session 1 : integer
+}
+
+.ZoneInfo {
+    zoneID 0 : integer
+    name 1 : string
+    ip 2 : string
+}
+
+.RoleInfo {
+  zoneID 0 : integer
+}
+
 getSecret 1 {
     request {
         clientkey 0 : string

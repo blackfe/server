@@ -1,5 +1,30 @@
 local game_proto = {}
 
+game_proto.types = [[
+.package {
+  type 0 : integer
+  session 1 : integer
+}
+
+.Position {
+  x 0 : integer
+  y 1 : integer
+  z 2 : integer
+  o 3 : integer
+}
+
+.MoveInfo {
+  account 0 : integer
+  pos 1 : Position
+}
+
+.ObjectInfo {
+    id 0 : integer
+    type 1 : integer
+    data 2 : string
+}
+]]
+
 game_proto.c2s = [[
 move 1 {
 	request {
@@ -36,4 +61,5 @@ createObjects 2 {
     }
 }
 ]]
+
 return game_proto

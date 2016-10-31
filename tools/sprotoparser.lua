@@ -70,8 +70,7 @@ local name = C(word)
 local typename = C(word * ("." * word) ^ 0)
 local tag = R"09" ^ 1 / tonumber
 local mainkey = "(" * blank0 * name * blank0 * ")"
-local typeTag = 0
-local protocolTag = 0
+
 local function multipat(pat)
 	return Ct(blank0 * (pat * blanks) ^ 0 * pat^0 * blank0)
 end
@@ -82,11 +81,11 @@ end
 
 local typedef = P {
 	"ALL",
-	FIELD = namedpat("field", (name * blanks  * blank0 * ":" * blank0 * (C"*")^-1 * typename * mainkey^0)),
+	FIELD = namedpat("field", (name * blanks * tag * blank0 * ":" * blank0 * (C"*")^-1 * typename * mainkey^0)),
 	STRUCT = P"{" * multipat(V"FIELD" + V"TYPE") * P"}",
 	TYPE = namedpat("type", P"." * name * blank0 * V"STRUCT" ),
 	SUBPROTO = Ct((C"request" + C"response") * blanks * (typename + V"STRUCT")),
-	PROTOCOL = namedpat("protocol", name * blanks * blank0 * P"{" * multipat(V"SUBPROTO") * P"}"),
+	PROTOCOL = namedpat("protocol", name * blanks * tag * blank0 * P"{" * multipat(V"SUBPROTO") * P"}"),
 	ALL = multipat(V"TYPE" + V"PROTOCOL"),
 }
 
@@ -95,9 +94,8 @@ local proto = blank0 * typedef * blank0
 local convert = {}
 
 function convert.protocol(all, obj)
-	local result = { tag = protocolTag }
-	protocolTag = protocolTag + 1
-	for _, p in ipairs(obj[2]) do
+	local result = { tag = obj[2] }
+	for _, p in ipairs(obj[3]) do
 		assert(result[p[1]] == nil)
 		local typename = p[2]
 		if type(typename) == "table" then
@@ -122,20 +120,19 @@ function convert.type(all, obj)
 				error(string.format("redefine %s in type %s", name, typename))
 			end
 			names[name] = true
-			local tag = typeTag
-			typeTag = typeTag + 1
+			local tag = f[2]
 			if tags[tag] then
 				error(string.format("redefine tag %d in type %s", tag, typename))
 			end
 			tags[tag] = true
 			local field = { name = name, tag = tag }
 			table.insert(result, field)
-			local fieldtype = f[2]
+			local fieldtype = f[3]
 			if fieldtype == "*" then
 				field.array = true
-				fieldtype = f[3]
+				fieldtype = f[4]
 			end
-			local mainkey = f[4]
+			local mainkey = f[5]
 			if mainkey then
 				assert(field.array)
 				field.key = mainkey
@@ -459,16 +456,6 @@ end
 
 function sparser.parse(text, name)
 	local r = parser(text, name or "=text")
-	local data = encodeall(r)
-	return data
-end
-
-function sparser.parseToTable(text,name)
-	local r = parser(text, name or "=text")
-	return data
-end
-
-function sparser.parseEncode(r)
 	local data = encodeall(r)
 	return data
 end
