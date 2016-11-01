@@ -14,9 +14,10 @@ SProto.ProtoMap = {}
 
 SProto.LOGIN_PROTO = 1
 SProto.GAME_PROTO = 2
+SProto.UPLOAD_PROTO = 3
 _origin_proto_map[SProto.LOGIN_PROTO] = require "login_proto"
 _origin_proto_map[SProto.GAME_PROTO] = require "game_proto"
-
+_origin_proto_map[SProto.UPLOAD_PROTO] = require "upload_proto"
 for k,v in pairs(_origin_proto_map) do
 	local localTypes = v.types or ""
 	SProto.ProtoMap[k] = sparser.parse(common_types .. localTypes .. v.c2s .. v.s2c)

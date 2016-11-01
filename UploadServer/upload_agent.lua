@@ -15,11 +15,22 @@ local ERROR = require("Errors")
 local currVer = {0,0,0}
 local endVer = ""
 local urlMap = {}
+local serverVerMap
 function REQUEST:checkUpload()
    skynet.error("checkUpload")
    local ver = string.split(self.ver,".")
+   local server_id = self.zoneID
+   local currVer = currVer
+   local endVer = endVer
+   if server_id ~= 0 then
+      if serverVerMap[server_id] ~= nil then
+         currVer = serverMap[server_id].currVer
+         endVer = servrMap[server_id].endVer
+      else
+         return {result = ERROR.ERROR}
+      end
+   end
    if #ver ~= 3 then
-      skynet.error("11111")
       return {result = ERROR.INVALID_VER}
    end
    if ver[1] == currVer[1] and ver[2] == currVer[2] and ver[3] == currVer[3] then
@@ -93,6 +104,7 @@ function CMD.start(config)
    client_fd = fd
    currVer = config.currVer
    endVer = config.endVer
+   serverVerMap = config.serverVerMap
    skynet.call(gate,"lua","forward",fd)
 end
 

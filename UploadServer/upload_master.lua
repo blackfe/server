@@ -7,6 +7,7 @@ local gate
 local agent = {}
 local SERVER_NAME
 local currVer = {0,0,0}
+local serverVerMap = {}
 local endVer = ""
 local function close_agent(fd)
    local a = agent[fd]
@@ -29,9 +30,13 @@ function CMD.start(conf)
          skynet.exit()
       end
       endVer = string.gsub(ver,"%.","_")
-      skynet.error(endVer)
-
    end
+end
+
+function CMD.register(config)
+   serverVerMap[config.id] = {}
+   serverVerMap[config.id].currVer = string.split(config.currVer,".")
+   serverVerMap[config.id].endVer = config.currVer
 end
 
 function CMD.close(fd)
@@ -42,7 +47,7 @@ function SOCKET.open(fd,addr)
    skynet.error("New client connect from :".. addr)
    agent[fd] = skynet.newservice("upload_agent")
 
-   skynet.call(agent[fd],"lua","start",{gate = gate,client = fd,currVer = currVer,endVer = endVer})
+   skynet.call(agent[fd],"lua","start",{gate = gate,client = fd,currVer = currVer,endVer = endVer,serverVerMap = serverVerMap})
 end
 
 function SOCKET.close(fd)

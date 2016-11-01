@@ -11,6 +11,7 @@ upload_proto.c2s = [[
 checkUpload 1 {
     request {
         ver 0 : string
+        lastZoneID 1 : integer
     }
     response {
         bUpdate 0 : integer

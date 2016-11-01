@@ -50,7 +50,7 @@ function REQUEST:verify()
 
    local zones = {}
    for k,v in pairs(server_list) do
-      table.insert(zones,v)
+      table.insert(zones,{zoneID = v.id,name = v.name,ip = v.ip})
    end
 
    local roles = {}

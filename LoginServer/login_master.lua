@@ -32,7 +32,7 @@ end
 
 function CMD.register(server)
    skynet.error("game server "..server.name.." regist")
-   server_list[server.name] = server
+   server_list[server.id] = server
 end
 
 function SOCKET.open(fd,addr)

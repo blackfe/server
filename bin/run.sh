@@ -1,6 +1,7 @@
 #!/bin/bash
 killall skynet
 sh master.sh
+sh upload.sh
 sh sql.sh
 sh login.sh
 sh game_1.sh

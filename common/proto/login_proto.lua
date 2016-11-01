@@ -1,8 +1,8 @@
 local login_proto = {}
 login_proto.types = [[
 .package {
-	type 0 : integer
-	session 1 : integer
+    type 0 : integer
+    session 1 : integer
 }
 ]]
 
