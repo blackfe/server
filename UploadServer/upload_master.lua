@@ -6,9 +6,8 @@ local SOCKET = {}
 local gate
 local agent = {}
 local SERVER_NAME
-local currVer = {0,0,0}
 local serverVerMap = {}
-local endVer = ""
+local recommend_server
 local function close_agent(fd)
    local a = agent[fd]
    if a then
@@ -19,24 +18,15 @@ end
 
 function CMD.start(conf)
    skynet.call(gate,"lua","open",conf)
-   local versionFile = io.open("/usr/local/nginx/html/version.txt","r")
-
-   if versionFile then
-      local ver = versionFile:read("*all")
-      ver = string.gsub(ver,"\n","")
-      currVer = string.split(ver,".")
-      if #currVer ~=3 then
-         skynet.error("version error")
-         skynet.exit()
-      end
-      endVer = string.gsub(ver,"%.","_")
-   end
 end
 
 function CMD.register(config)
    serverVerMap[config.id] = {}
    serverVerMap[config.id].currVer = string.split(config.currVer,".")
-   serverVerMap[config.id].endVer = config.currVer
+   serverVerMap[config.id].currVerStr = string.gsub(config.currVer,"%.","_")
+   if recommend_server == nil then
+      recommend_server = serverVerMap[config.id]
+   end
 end
 
 function CMD.close(fd)
@@ -47,7 +37,7 @@ function SOCKET.open(fd,addr)
    skynet.error("New client connect from :".. addr)
    agent[fd] = skynet.newservice("upload_agent")
 
-   skynet.call(agent[fd],"lua","start",{gate = gate,client = fd,currVer = currVer,endVer = endVer,serverVerMap = serverVerMap})
+   skynet.call(agent[fd],"lua","start",{gate = gate,client = fd,recommend_server = recommend_server,serverVerMap = serverVerMap})
 end
 
 function SOCKET.close(fd)

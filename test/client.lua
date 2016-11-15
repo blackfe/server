@@ -189,6 +189,7 @@ function RESPONSE:verify()
 end
 
 function RESPONSE:checkUpload()
+  dump(self)
   bUpload = true
   socket.close(fd)
   fd = nil
@@ -235,7 +236,7 @@ function start_upload()
   sp = sprotoloader.load(Sproto.UPLOAD_PROTO)
   host = sp:host("package")
   request = host:attach(sp)
-  send_request("checkUpload",{zoneID = 1001,ver = "0.0.1"})
+  send_request("checkUpload",{zoneID = 1001,ver = "1.0.0"})
 end
 
 function start_login()

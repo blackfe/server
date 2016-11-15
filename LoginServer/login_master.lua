@@ -77,7 +77,6 @@ skynet.start(function()
       gate = skynet.newservice("gate")
       skynet.register("login_master")
       skynet.call("GAMESQL","lua","register",SERVER_NAME)
-      skynet.error("123")
       local data = skynet.call("GAMESQL","lua","get","server_state",{servername = SERVER_NAME})
       max_account = data.count or 0
 end)

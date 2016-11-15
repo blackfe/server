@@ -14,7 +14,7 @@ checkUpload 1 {
         lastZoneID 1 : integer
     }
     response {
-        bUpdate 0 : integer
+        updateType 0 : integer
         sURL 1 : string
     }
 }
