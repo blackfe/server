@@ -1,6 +1,7 @@
 local skynet = require "skynet"
 local socket = require "socket"
 local sproto = require "sproto"
+local Sproto = require "main_proto"
 local sprotoloader = require "sprotoloader"
 require("functions")
 local crypt = require "crypt"
@@ -49,7 +50,7 @@ function REQUEST:verify()
 
    local zones = {}
    for k,v in pairs(server_list) do
-      table.insert(zones,v)
+      table.insert(zones,{zoneID = v.id,name = v.name,ip = v.ip})
    end
 
    local roles = {}
@@ -67,8 +68,13 @@ function REQUEST:login()
    local accountID,server = etoken:match("([^@]+):(.+)")
    accountID = crypt.base64decode(accountID)
    server = crypt.base64decode(server)
-   local s = server_list[server]
-   skynet.error(accountID)
+   local s
+   for k,v in pairs(server_list) do
+      if v.name == server then
+         s = v
+      end
+   end
+
    if s ~= nil then
       local token = skynet.call(s.addr,"lua","login",{accountID = accountID})
       return {result = ERROR.SUCCESS,token = token}
@@ -121,7 +127,7 @@ function CMD.start(config)
    login_master = config.watchdog
 
    server_list = config.server_list
-   login_sproto = sprotoloader.load(1)
+   login_sproto = sprotoloader.load(Sproto.LOGIN_PROTO)
    host = login_sproto:host "package"
    client_fd = fd
    skynet.call(gate,"lua","forward",fd)

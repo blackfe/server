@@ -1,13 +1,13 @@
 local skynet = require "skynet"
 require "skynet.manager"
 require "functions"
-local gate
 local CMD = {}
 local SOCKET = {}
+local gate
 local agent = {}
 local SERVER_NAME
-local server_list = {}
-local max_account = 0
+local serverVerMap = {}
+local recommend_server
 local function close_agent(fd)
    local a = agent[fd]
    if a then
@@ -20,26 +20,24 @@ function CMD.start(conf)
    skynet.call(gate,"lua","open",conf)
 end
 
+function CMD.register(config)
+   serverVerMap[config.id] = {}
+   serverVerMap[config.id].currVer = string.split(config.currVer,".")
+   serverVerMap[config.id].currVerStr = string.gsub(config.currVer,"%.","_")
+   if recommend_server == nil then
+      recommend_server = serverVerMap[config.id]
+   end
+end
+
 function CMD.close(fd)
    close_agent(fd)
 end
 
-function CMD.newAccountID()
-   max_account = max_account + 1
-   skynet.call("GAMESQL","lua","set","server_state",{count = max_account},{servername = SERVER_NAME})
-   return max_account
-end
-
-function CMD.register(server)
-   skynet.error("game server "..server.name.." regist")
-   server_list[server.id] = server
-end
-
 function SOCKET.open(fd,addr)
-   skynet.error("New client login from :".. addr)
-   agent[fd] = skynet.newservice("login_agent")
+   skynet.error("New client connect from :".. addr)
+   agent[fd] = skynet.newservice("upload_agent")
 
-   skynet.call(agent[fd],"lua","start",{gate = gate,client = fd,watchdog = skynet.self(),server_list = server_list})
+   skynet.call(agent[fd],"lua","start",{gate = gate,client = fd,recommend_server = recommend_server,serverVerMap = serverVerMap})
 end
 
 function SOCKET.close(fd)
@@ -47,7 +45,7 @@ function SOCKET.close(fd)
 end
 
 function SOCKET.error(fd,message)
-   skynet.error("Client "..fd.." login with errro:"..message)
+   skynet.error("Client "..fd.." connect with errro:"..message)
    close_agent(fd)
 end
 
@@ -75,8 +73,5 @@ skynet.start(function()
 
       end)
       gate = skynet.newservice("gate")
-      skynet.register("login_master")
-      skynet.call("GAMESQL","lua","register",SERVER_NAME)
-      local data = skynet.call("GAMESQL","lua","get","server_state",{servername = SERVER_NAME})
-      max_account = data.count or 0
+      skynet.register("upload_master")
 end)

@@ -1,5 +1,5 @@
 package.cpath = "../skynet/luaclib/?.so"
-package.path = "../skynet/lualib/?.lua;../proto/?.lua;../core/?.lua"
+package.path = "../skynet/lualib/?.lua;../common/proto/?.lua;../common/?.lua;../Utils/?.lua"
 
 if _VERSION ~= "Lua 5.3" then
    error "Use lua 5.3"
@@ -8,19 +8,21 @@ end
 require "functions"
 
 local socket = require "clientsocket"
-local login_proto = require "login_proto"
-local game_proto = require "game_proto"
 local sparser = require "sprotoparser"
+local sprotoloader = require "sprotoloader"
 local sproto = require "sproto"
 local crypt = require "crypt"
+local Sproto = require "main_proto"
 
-local fd = assert(socket.connect("0.0.0.0", 8001))
-local host = sproto.new(login_proto.s2c):host("package")
-local request = host:attach(sproto.new(login_proto.c2s))
+local fd
+local sp
+local host
+local request
 
 local session = 0
 local last = ""
 local bLogin = false
+local bUpload = false
 local RESPONSE = {}
 local REQUEST = {}
 
@@ -47,6 +49,7 @@ local function send_request(name,args)
       end
       
       local str = request(name,args,session)
+      print(str)
       send_package(fd,str)
 end
 
@@ -87,7 +90,6 @@ local function deal_request(name,args)
 end
 
 local function deal_response(session,args)
-      print("RESPONSE",session)
       if args then
         print(dump(args))
       end
@@ -112,7 +114,9 @@ end
 local function dispatch_package()
   while true do
     local v
-    v,last = recv_package(last)
+    if fd then
+        v,last = recv_package(last)
+    end
     if not v then
       break
     end
@@ -153,7 +157,7 @@ end
 
 function RESPONSE:getSecret()
   local serverkey = crypt.base64decode(self.serverkey)
-  print(dump(self))
+
   local challenge = crypt.base64decode(self.challenge)
   secret = crypt.dhsecret(serverkey, clientkey)
   local hmac = crypt.hmac64(challenge,secret)
@@ -184,10 +188,18 @@ function RESPONSE:verify()
   send_request("login",{etoken = etoken})
 end
 
+function RESPONSE:checkUpload()
+  dump(self)
+  bUpload = true
+  socket.close(fd)
+  fd = nil
+end
+
 function RESPONSE:login()
-    bLogin = true
-    host = sproto.new(game_proto.s2c):host("package")
-    request = host:attach(sproto.new(game_proto.c2s))
+  bLogin = true
+  sp = sprotoloader.load(Sproto.GAME_PROTO)
+    host = sp:host("package")
+    request = host:attach(sp)
     socket.close(fd)
     os.exit()
     print(dump(server_ip))
@@ -215,25 +227,48 @@ end
 
 local count = 0
 
+function start_upload()
+  if fd then
+    return
+  end
+
+  fd = assert(socket.connect("47.88.6.248",8002))
+  sp = sprotoloader.load(Sproto.UPLOAD_PROTO)
+  host = sp:host("package")
+  request = host:attach(sp)
+  send_request("checkUpload",{zoneID = 1001,ver = "1.0.0"})
+end
+
 function start_login()
+  if fd then
+    socket.close(fd)
+    fd = nil
+  end
+  fd = assert(socket.connect("47.88.6.248", 8001))
+  sp = sprotoloader.load(Sproto.LOGIN_PROTO)
+  host = sp:host("package")
+  request = host:attach(sp)
+
   clientkey = crypt.randomkey()
   send_request("getSecret",{clientkey = crypt.base64encode(crypt.dhexchange(clientkey))})
 end
 
 math.randomseed(os.clock())
 
+bUpload = true
 while true do
+  local cmd
+  if fd then
       dispatch_package()
-      local cmd = socket.readstdin()
-      if cmd then
-         
-      else
-        if bLogin == false then
-          start_login()
-          bLogin = true
-        else
-
-        end
-        socket.usleep(10)
   end
+
+  if bUpload == false then
+    start_upload()
+  elseif bLogin == false then
+    start_login()
+    bLogin = true
+  else
+
+  end
+  socket.usleep(10)
 end
