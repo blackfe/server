@@ -94,11 +94,11 @@ skynet.start(function()
 	end)
 
 	server_id = skynet.getenv("server_id")
-	server_name = Table.ServerList.get(server_id).sName
+	server_name = Table.ZoneMap.get(server_id).sName
 	gate = skynet.newservice("gate")
 	onlinePlayerMgr = skynet.newservice("OnlinePlayerMgr")
 	skynet.call(onlinePlayerMgr,"lua","start",{watchdog = skynet.self()})
-	skynet.call("login_master","lua","register",{id = server_id,name = server_name,ip = "127.0.0.1:"..skynet.getenv("port"),addr = skynet.self()})
+	skynet.call("login_master","lua","register",{id = server_id,name = server_name,ip = "47.88.6.248:"..skynet.getenv("port"),addr = skynet.self()})
 	require "config"
 	skynet.call("upload_master","lua","register",{id = server_id,currVer = LUA_VERSION})
 	skynet.call("GAMESQL","lua","register",server_name)

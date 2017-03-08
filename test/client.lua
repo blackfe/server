@@ -255,6 +255,7 @@ end
 
 math.randomseed(os.clock())
 
+bUpload = true
 while true do
   local cmd
   if fd then

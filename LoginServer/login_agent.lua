@@ -68,8 +68,13 @@ function REQUEST:login()
    local accountID,server = etoken:match("([^@]+):(.+)")
    accountID = crypt.base64decode(accountID)
    server = crypt.base64decode(server)
-   local s = server_list[server]
-   skynet.error(accountID)
+   local s
+   for k,v in pairs(server_list) do
+      if v.name == server then
+         s = v
+      end
+   end
+
    if s ~= nil then
       local token = skynet.call(s.addr,"lua","login",{accountID = accountID})
       return {result = ERROR.SUCCESS,token = token}
