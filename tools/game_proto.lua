@@ -1,63 +1,35 @@
 
 local game_proto = {}
-game_proto.type = [[
-.package {
-  type : integer
-  session : integer
-}
-
+game_proto.data = [[]] .. require(player_info_proto.data)
+game_proto.data = game_proto.data .. [[
 .Position {
-  x : integer
-  y : integer
-  z : integer
-  o : integer
+  x 0 : integer
+  y 1 : integer
+  z 2 : integer
+  o 3 : integer
 }
 
 .MoveInfo {
-  account : integer
-  pos : Position
+  iAccount 0 : integer
+  stPos 1 : Position
 }
 
 .ObjectInfo {
-    id : integer
-    type : integer
-    data : string
-}
-]]
-
-game_proto.c2s = [[
-move {
-	request {
-		pos : Position
-	}
-	response {
-		result : integer
-	}
+    iID 0 : integer
+    iType 1 : integer
+    sData 2 : string
 }
 
-playersInfo {
+Game_PlayersInfo_SC {
     response {
-      player : *MoveInfo
+      stPlayer 0 : *MoveInfo
+      stTest 1 : PlayerInfo
     }
 }
 
-myInfo {
+Game_MyInfo_SC {
     response {
-      pos : Position
-    }
-}
-]]
-
-game_proto.s2c = [[
-playerMove {
-  request {
-    player : MoveInfo
-  }
-}
-
-createObjects {
-    request {
-        objects : *ObjectInfo
+      stPos 0 : Position
     }
 }
 ]]

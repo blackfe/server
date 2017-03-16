@@ -1,52 +1,48 @@
 local login_proto = {}
-
-login_proto.c2s = [[
+login_proto.data = [[
 .ZoneInfo {
-    zoneID  : integer
-    name  : string
-    ip  : string
+    iZoneID 0 : integer
+    sName 1 : string
+    sIP 2 : string
 }
 
 .RoleInfo {
-  zoneID  : integer
+    iZoneID 0 : integer
 }
 
-getSecret {
+Login_GetSecret_CS {
     request {
-        clientkey : string
+        sClientkey 0 : string
     }
 
     response {
-        challenge  : string
-        serverkey  : string
+        sChallenge 0 : string
+        sServerkey 1 : string
     }
 }
 
-verify {
+Login_Verify_CS {
     request {
-        hmac  : string
-        token  : string
+        sHmac 0 : string
+        sToken 1 : string
     }
     response {
-        result  : integer
-        accountID  : integer
-        zones  : *ZoneInfo
-        roles  : *RoleInfo
+        iResult 0 : integer
+        iAccountID 1 : integer
+        vZones 2 : *ZoneInfo
+        vRoles 3 : *RoleInfo
     }
 }
 
-login  {
+Login_CS {
     request {
-        etoken   : string
+        sEtoken 0  : string
     }
     response {
-        result  : integer
-        token  : string
+        iResult 0 : integer
+        sToken 1 : string
     }
 }
-]]
-
-login_proto.s2c =  [[
 ]]
 
 return login_proto

@@ -1,5 +1,5 @@
 local player_proto = {}
-player_proto.player_info = [[
+player_proto.data = [[
 .Skill {
     id : integer
     level : integer

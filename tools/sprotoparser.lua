@@ -1,6 +1,8 @@
 local lpeg = require "lpeg"
 local table = require "table"
 
+local crypt = require "crypt"
+
 local packbytes
 local packvalue
 
@@ -70,8 +72,7 @@ local name = C(word)
 local typename = C(word * ("." * word) ^ 0)
 local tag = R"09" ^ 1 / tonumber
 local mainkey = "(" * blank0 * name * blank0 * ")"
-local typeTag = 0
-local protocolTag = 0
+
 local function multipat(pat)
 	return Ct(blank0 * (pat * blanks) ^ 0 * pat^0 * blank0)
 end
@@ -95,8 +96,7 @@ local proto = blank0 * typedef * blank0
 local convert = {}
 
 function convert.protocol(all, obj)
-	local result = { tag = protocolTag }
-	protocolTag = protocolTag + 1
+	local result = { tag = crypt.sha1(typename) }
 	for _, p in ipairs(obj[2]) do
 		assert(result[p[1]] == nil)
 		local typename = p[2]
@@ -122,8 +122,7 @@ function convert.type(all, obj)
 				error(string.format("redefine %s in type %s", name, typename))
 			end
 			names[name] = true
-			local tag = typeTag
-			typeTag = typeTag + 1
+			local tag = crypt.sha1(name)
 			if tags[tag] then
 				error(string.format("redefine tag %d in type %s", tag, typename))
 			end
