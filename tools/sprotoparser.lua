@@ -1,4 +1,5 @@
 local lpeg = require "lpeg"
+require "functions"
 local table = require "table"
 
 local crypt = require "crypt"
@@ -55,7 +56,13 @@ local function count_lines(_,pos, parser_state)
 end
 
 local exception = lpeg.Cmt( lpeg.Carg(1) , function ( _ , pos, parser_state)
-	error(string.format("syntax error at [%s] line (%d)", parser_state.file or "", parser_state.line))
+	local errorCode = string.format("syntax error at [%s] line (%d)\n", parser_state.file or "", parser_state.line)
+	local textList = string.split(parser_state.text,"\n")
+	local startLine = (parser_state.line - 5 > 0) and parser_state.line -5 or 1
+	for i = startLine,startLine+10 do
+		errorCode = errorCode .. string.format("line: %s\t%s\n",(i+1),textList[i])
+	end
+	error(errorCode)
 	return pos
 end)
 
@@ -73,6 +80,7 @@ local typename = C(word * ("." * word) ^ 0)
 local tag = R"09" ^ 1 / tonumber
 local mainkey = "(" * blank0 * name * blank0 * ")"
 
+local protoTag = 0
 local function multipat(pat)
 	return Ct(blank0 * (pat * blanks) ^ 0 * pat^0 * blank0)
 end
@@ -83,7 +91,7 @@ end
 
 local typedef = P {
 	"ALL",
-	FIELD = namedpat("field", (name * blanks  * blank0 * ":" * blank0 * (C"*")^-1 * typename * mainkey^0)),
+	FIELD = namedpat("field", (name * blanks * tag * blank0 * ":" * blank0 * (C"*")^-1 * typename * mainkey^0)),
 	STRUCT = P"{" * multipat(V"FIELD" + V"TYPE") * P"}",
 	TYPE = namedpat("type", P"." * name * blank0 * V"STRUCT" ),
 	SUBPROTO = Ct((C"request" + C"response") * blanks * (typename + V"STRUCT")),
@@ -96,7 +104,8 @@ local proto = blank0 * typedef * blank0
 local convert = {}
 
 function convert.protocol(all, obj)
-	local result = { tag = crypt.sha1(typename) }
+	local result = { tag = protoTag }
+	protoTag = protoTag + 1
 	for _, p in ipairs(obj[2]) do
 		assert(result[p[1]] == nil)
 		local typename = p[2]
@@ -122,19 +131,19 @@ function convert.type(all, obj)
 				error(string.format("redefine %s in type %s", name, typename))
 			end
 			names[name] = true
-			local tag = crypt.sha1(name)
+			local tag = f[2]
 			if tags[tag] then
 				error(string.format("redefine tag %d in type %s", tag, typename))
 			end
 			tags[tag] = true
 			local field = { name = name, tag = tag }
 			table.insert(result, field)
-			local fieldtype = f[2]
+			local fieldtype = f[3]
 			if fieldtype == "*" then
 				field.array = true
-				fieldtype = f[3]
+				fieldtype = f[4]
 			end
-			local mainkey = f[4]
+			local mainkey = f[5]
 			if mainkey then
 				assert(field.array)
 				field.key = mainkey
@@ -230,7 +239,7 @@ local function flattypename(r)
 end
 
 local function parser(text,filename)
-	local state = { file = filename, pos = 0, line = 1 }
+	local state = { file = filename, pos = 0, line = 1,text=text}
 	local r = lpeg.match(proto * -1 + exception , text , 1, state )
 	return flattypename(check_protocol(adjust(r)))
 end

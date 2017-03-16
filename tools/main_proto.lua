@@ -1,3 +1,7 @@
+
+package.cpath = "../skynet/luaclib/?.so"
+package.path = "./?.lua;../skynet/lualib/?.lua;../common/?.lua;../Utils/?.lua"
+
 local sparser = require "sprotoparser"
 --local sprotoloader = require "sprotoloader"
 
@@ -25,7 +29,7 @@ _origin_proto_map[SProto.LOGIN_PROTO] = require "login_proto"
 _origin_proto_map[SProto.GAME_PROTO] = require "game_proto"
 _origin_proto_map[SProto.UPLOAD_PROTO] = require "upload_proto"
 for k,v in pairs(_origin_proto_map) do
-	local localTypes = v.types or ""
+
 	SProto.ProtoMap[k] = sparser.parse(_header..v.data)
 	--sprotoloader.save(SProto.ProtoMap[k], k)
 end

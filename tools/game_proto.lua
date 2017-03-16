@@ -1,6 +1,6 @@
 
 local game_proto = {}
-game_proto.data = [[]] .. require(player_info_proto.data)
+game_proto.data = [[]] .. require("player_info_proto").data
 game_proto.data = game_proto.data .. [[
 .Position {
   x 0 : integer
@@ -23,7 +23,6 @@ game_proto.data = game_proto.data .. [[
 Game_PlayersInfo_SC {
     response {
       stPlayer 0 : *MoveInfo
-      stTest 1 : PlayerInfo
     }
 }
 

@@ -1,13 +1,13 @@
 local player_proto = {}
 player_proto.data = [[
 .Skill {
-    id : integer
-    level : integer
+    iID  0 : integer
+    iLevel 1 : integer
 }
 .Base {
-  hp : integer
-  level : integer
-  skillList : *Skill
+  iHP  0 : integer
+  iLevel 1 : integer
+  vSkillList 2 : *Skill
 }
 ]]
 
